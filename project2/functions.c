@@ -200,7 +200,7 @@ void decode(InstInfo *instruction)
 	  instruction->s1data = regfile[instruction->input1];
 	  instruction->s2data = instruction->input2;
 	  //added for project 2.
-	  instruction->input1 = instruction->fields.rs+instruction->fields.imm;
+	  instruction->input1 = instruction->s1data+instruction->fields.imm;
 	}
 
 	//sw
@@ -226,6 +226,7 @@ void decode(InstInfo *instruction)
 	    //we are reading from the rt register, but performing 
 	    //the alu operation on the rs reg
 	    instruction->input1 = instruction->fields.rt;
+	    instruction->input2 = instruction->fields.rs;
 	  }
 
 	// if it is a bge

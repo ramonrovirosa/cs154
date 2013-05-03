@@ -31,16 +31,68 @@ int main(int argc, char *argv[])
 	{
 		fetch(pipelineInsts[0]);
 		decode(pipelineInsts[1]);
+
+
 		execute(pipelineInsts[2]);
+		
+		//add1 $s2,$s1,$0
+		//add2 $s1,$0,$0 //$s1 dependency
+		//if the dest of the second one is used in the first one, than
+		//you must data forward the aluout of add2 to the $s1 register
+		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input1)
+		  pipelineInsts[1]->s1data = pipelineInsts[2]->aluout;
+        
+		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input2)
+		  pipelineInsts[1]->s2data = pipelineInsts[2]->aluout;
+		
 		memory(pipelineInsts[3]);
+
+		
+		if( pipelineInsts[3]->destreg == pipelineInsts[1]->input1){
+		  // if the instruction that just went through the memory function
+		  // is a lw then you pull from memout otherwise you pull from aluout
+		  if(pipelineInsts[3]->fields.op == 6){
+		    pipelineInsts[1]->s1data = pipelineInsts[3]->memout;
+		  }else{
+		    pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
+		  }
+		}
+	        if(pipelineInsts[3]->destreg  == pipelineInsts[1]->input2){
+		  if(pipelineInsts[3]->fields.op == 6){
+		    pipelineInsts[1]->s2data = pipelineInsts[3]->memout;
+		  }else{
+		    pipelineInsts[1]->s2data = pipelineInsts[3]->aluout;
+		  }
+		}
+
 		writeback(pipelineInsts[4]);
+
+		if( pipelineInsts[4]->input1 == pipelineInsts[1]->destreg ){
+		  if(pipelineInsts[4]->fields.op == 6){
+		    pipelineInsts[1]->s1data = pipelineInsts[4]->memout;
+		  }else{
+		    pipelineInsts[1]->s1data = pipelineInsts[4]->aluout;
+		  }
+		}
+		  
+		if(  pipelineInsts[4]->input2  == pipelineInsts[1]->destreg){
+		  if(pipelineInsts[4]->fields.op == 6){
+		    pipelineInsts[1]->s2data = pipelineInsts[4]->memout;
+		  }else{
+		    pipelineInsts[1]->s2data = pipelineInsts[4]->aluout;
+		  }
+		}
+		  
 		//print(instPtr,instnum++);
 		printP2(pipelineInsts[0],pipelineInsts[1],pipelineInsts[2],
 			pipelineInsts[3],pipelineInsts[4],cycles);
 
+
 		//check # of executions
 		if(pipelineInsts[2]->inst !=0)
 		  executions++;
+
+
 
 		InstInfo * tmp = pipelineInsts[4];
 		pipelineInsts[4]=pipelineInsts[3];
@@ -51,6 +103,8 @@ int main(int argc, char *argv[])
 		cycles++;
 
 	}
+
+	
 	
 	// put in your own variables
 	printf("Cycles: %d\n",cycles );

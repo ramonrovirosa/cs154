@@ -18,18 +18,32 @@ int main(int argc, char *argv[])
 		printf("Usage: sim filename\n");
 		exit(0);
 	}
-
+	int i;
+	for (i=0;i<5;i++){
+		pipelineInsts[i]=malloc(sizeof(InstInfo));
+		pipelineInsts[i]->inst=0;
+	}
 	maxpc = load(argv[1]);
 	printLoad(maxpc);
-
+	printf("finished load");
+	int count = 0;
 	while (pc <= maxpc)
 	{
-		fetch(instPtr);
-		decode(instPtr);
-		execute(instPtr);
-		memory(instPtr);
-		writeback(instPtr);
-		print(instPtr,instnum++);
+		fetch(pipelineInsts[0]);
+		decode(pipelineInsts[1]);
+		execute(pipelineInsts[2]);
+		memory(pipelineInsts[3]);
+		writeback(pipelineInsts[4]);
+		//print(instPtr,instnum++);
+		printP2(pipelineInsts[0],pipelineInsts[1],pipelineInsts[2],pipelineInsts[3],pipelineInsts[4],count);
+		InstInfo * tmp = pipelineInsts[4];
+		pipelineInsts[4]=pipelineInsts[3];
+		pipelineInsts[3]=pipelineInsts[2];
+		pipelineInsts[2]=pipelineInsts[1];
+		pipelineInsts[1]=pipelineInsts[0];
+		pipelineInsts[0]=tmp;
+		count++;
+
 	}
 	
 	// put in your own variables

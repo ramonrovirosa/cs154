@@ -307,7 +307,7 @@ void decode(InstInfo *instruction)
 	    instruction->input2 = instruction->fields.rt;
 	}
 	else{
-		printf("Reached end, oppcode is %d", instruction->fields.op);
+	  //printf("Reached end, oppcode is %d", instruction->fields.op);
 	}
 }
 

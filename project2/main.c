@@ -24,10 +24,10 @@ int main(int argc, char *argv[])
 		pipelineInsts[i]->inst=0;
 	}
 	maxpc = load(argv[1]);
-	printLoad(maxpc);
-	printf("finished load");
-	int count = 0;
-	while (pc <= maxpc)
+	//printLoad(maxpc);
+	//printf("finished load");
+	int cycles = 0, executions=0;
+	while (pc <= maxpc + 4)
 	{
 		fetch(pipelineInsts[0]);
 		decode(pipelineInsts[1]);
@@ -35,20 +35,26 @@ int main(int argc, char *argv[])
 		memory(pipelineInsts[3]);
 		writeback(pipelineInsts[4]);
 		//print(instPtr,instnum++);
-		printP2(pipelineInsts[0],pipelineInsts[1],pipelineInsts[2],pipelineInsts[3],pipelineInsts[4],count);
+		printP2(pipelineInsts[0],pipelineInsts[1],pipelineInsts[2],
+			pipelineInsts[3],pipelineInsts[4],cycles);
+
+		//check # of executions
+		if(pipelineInsts[2]->inst !=0)
+		  executions++;
+
 		InstInfo * tmp = pipelineInsts[4];
 		pipelineInsts[4]=pipelineInsts[3];
 		pipelineInsts[3]=pipelineInsts[2];
 		pipelineInsts[2]=pipelineInsts[1];
 		pipelineInsts[1]=pipelineInsts[0];
 		pipelineInsts[0]=tmp;
-		count++;
+		cycles++;
 
 	}
 	
 	// put in your own variables
-	//printf("Cycles: %d\n", );
-	//printf("Instructions Executed: %d\n", );
+	printf("Cycles: %d\n",cycles );
+	printf("Instructions Executed: %d\n", executions );
 	exit(0);
 }
 

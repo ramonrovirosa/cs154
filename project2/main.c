@@ -26,14 +26,20 @@ int main(int argc, char *argv[])
 	maxpc = load(argv[1]);
 	//printLoad(maxpc);
 	//printf("finished load");
-	int cycles = 0, executions=0;
-	while (pc <= maxpc + 4)
+	int cycles = 0, executions=0, stalling = 0;
+	int maxPC = maxpc + 4;
+	while (pc <= maxPC)
 	{
-	  //if(pipelineInsts[0]->inst != 0)
-	  fetch(pipelineInsts[0]);
-	  if(pipelineInsts[1]->inst != 0)
+	  //if(pc <=  maxpc+4){
+	  if(stalling==0)//if stalling dont fetch
+	    fetch(pipelineInsts[0]);
+	    // }
+	    // else{
+	    // pc++;
+	    // }
+	  if(pipelineInsts[1]->inst != 0 && stalling == 0)
 		decode(pipelineInsts[1]);
-
+	  stalling = 0;
 	  if(pipelineInsts[2]->inst != 0){
 		execute(pipelineInsts[2]);
 		
@@ -44,11 +50,20 @@ int main(int argc, char *argv[])
 		
 		//printf("\nexecute alu out: %d ", pipelineInsts[2]->aluout);
 		
-		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input1)
-		  pipelineInsts[1]->s1data = pipelineInsts[2]->aluout;
-        
-		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input2)
-		  pipelineInsts[1]->s2data = pipelineInsts[2]->aluout;
+		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input1){
+		  //if it is a lw
+		  if(pipelineInsts[2]->fields.op==6)
+		    stalling =1;
+		  else
+		    pipelineInsts[1]->s1data = pipelineInsts[2]->aluout;
+		}
+		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input2){
+		  //if a lw
+		  if(pipelineInsts[2]->fields.op==6)
+		    stalling=1;
+		  else 
+		    pipelineInsts[1]->s2data = pipelineInsts[2]->aluout;
+		}
 	  }
 
 	  if(pipelineInsts[3]->inst != 0){
@@ -111,13 +126,26 @@ int main(int argc, char *argv[])
 	    executions++;
 	  
 	  
-	  
-	  InstInfo * tmp = pipelineInsts[4];
-	  pipelineInsts[4]=pipelineInsts[3];
-	  pipelineInsts[3]=pipelineInsts[2];
-	  pipelineInsts[2]=pipelineInsts[1];
-	  pipelineInsts[1]=pipelineInsts[0];
-	  pipelineInsts[0]=tmp;
+	  if(stalling == 0){ 
+	    InstInfo * tmp = pipelineInsts[4];
+	    pipelineInsts[4]=pipelineInsts[3];
+	    pipelineInsts[3]=pipelineInsts[2];
+	    pipelineInsts[2]=pipelineInsts[1];
+	    pipelineInsts[1]=pipelineInsts[0];
+	    pipelineInsts[0]=tmp;
+	  }
+	  //push M, X Down
+	  else{
+	    InstInfo * tmp = pipelineInsts[4];
+	    pipelineInsts[4]=pipelineInsts[3];
+	    pipelineInsts[3]=pipelineInsts[2];
+	    
+	    //stall on execute
+	    tmp->inst=0;
+	    pipelineInsts[2] = tmp;
+	    //for while loop
+	    //maxPC++;
+	  }
 	  cycles++;
 	  
 	}

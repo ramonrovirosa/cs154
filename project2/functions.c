@@ -200,7 +200,7 @@ void decode(InstInfo *instruction)
 	  instruction->s1data = regfile[instruction->input1];
 	  instruction->s2data = instruction->input2;
 	  //added for project 2.
-	  instruction->input1 = instruction->s1data+instruction->fields.imm;
+	  // instruction->input1 = instruction->s1data+instruction->fields.imm;
 	}
 
 	//sw
@@ -375,18 +375,25 @@ void execute(InstInfo *instruction)
  */
 void memory(InstInfo *instruction)
 {
+  // printf("\n(start of mem function) mem[3] is %d\n",datamem[3]);
   int addr = (instruction->aluout)>>2;
+  //printf("\naddr is %d\n", instruction->aluout);
   //sw
   //sw $s1,100($s2) == Memory[$s2+100] = $s1
-  if(instruction->fields.op==2)
+  if(instruction->fields.op==2){
     //datamem[addr]=regfile[instruction->destreg];
+    //printf("\n regfile[instruction->fields.rt]): %d", regfile[instruction->fields.rt]);
       datamem[addr] = regfile[instruction->fields.rt];
   //lw
-  if(instruction->fields.op==6){
+  }if(instruction->fields.op==6){
     //get rt mem address + imm
    //    instruction->destdata=datamem[addr];
+    
     instruction->memout = datamem[addr];
+    // printf("\nlw memout is %d\n",instruction->memout);
    }
+  //printf("\n(end of mem function) mem[3] is %d\n",datamem[3]);
+
 }
 
 /* writeback

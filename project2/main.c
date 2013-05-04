@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 		//if the dest of the second one is used in the first one, than
 		//you must data forward the aluout of add2 to the $s1 register
 		
+		//printf("\nexecute alu out: %d ", pipelineInsts[2]->aluout);
 		
 		if( pipelineInsts[2]->destreg == pipelineInsts[1]->input1)
 		  pipelineInsts[1]->s1data = pipelineInsts[2]->aluout;
@@ -52,12 +53,19 @@ int main(int argc, char *argv[])
 
 	  if(pipelineInsts[3]->inst != 0){
 	    memory(pipelineInsts[3]);	
-		
+
+
 		if( pipelineInsts[3]->destreg == pipelineInsts[1]->input1){
+
+		  printf("\nDepend mem to decode: pipelineInsts[1]->input1: %d,  pipelineInsts[3]->destreg: %d\n", pipelineInsts[1]->input1, pipelineInsts[3]->destreg);
+
 		  // if the instruction that just went through the memory function
 		  // is a lw then you pull from memout otherwise you pull from aluout
 		  if(pipelineInsts[3]->fields.op == 6){
 		    pipelineInsts[1]->s1data = pipelineInsts[3]->memout;
+		  }else if(pipelineInsts[1]->fields.op==2){
+		    //pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
+
 		  }else{
 		    pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
 		  }
@@ -76,43 +84,44 @@ int main(int argc, char *argv[])
 		
 	    //if( pipelineInsts[4]->input1 == pipelineInsts[1]->destreg ){
 	    if(pipelineInsts[4]->destreg == pipelineInsts[1]->input1){
-	      if(pipelineInsts[4]->fields.op == 6){
-		    pipelineInsts[1]->s1data = pipelineInsts[4]->memout;
-		  }else{
-		    pipelineInsts[1]->s1data = pipelineInsts[4]->aluout;
-		  }
-		}
-		
+	      if(pipelineInsts[4]->fields.op == 6){//lw
+		pipelineInsts[1]->s1data = pipelineInsts[4]->memout;
+	      }else{
+		pipelineInsts[1]->s1data = pipelineInsts[4]->aluout;
+		printf("\n s1data: %d, aluout: %d \n",pipelineInsts[1]->s1data,  pipelineInsts[4]->aluout);
+	      }
+	    }
+	    
 	    //if(  pipelineInsts[4]->input2  == pipelineInsts[1]->destreg){
 	    if(pipelineInsts[4]->destreg == pipelineInsts[1]->input2){
 	      if(pipelineInsts[4]->fields.op == 6){
-		    pipelineInsts[1]->s2data = pipelineInsts[4]->memout;
-		  }else{
-		    pipelineInsts[1]->s2data = pipelineInsts[4]->aluout;
-		  }
-		}
+		pipelineInsts[1]->s2data = pipelineInsts[4]->memout;
+	      }else{
+		pipelineInsts[1]->s2data = pipelineInsts[4]->aluout;
+	      }
+	    }
 	  } 
-		//print(instPtr,instnum++);
-		printP2(pipelineInsts[0],pipelineInsts[1],pipelineInsts[2],
-			pipelineInsts[3],pipelineInsts[4],cycles);
-
-
-		//check # of executions
-		if(pipelineInsts[2]->inst !=0)
-		  executions++;
-
-
-
-		InstInfo * tmp = pipelineInsts[4];
-		pipelineInsts[4]=pipelineInsts[3];
-		pipelineInsts[3]=pipelineInsts[2];
-		pipelineInsts[2]=pipelineInsts[1];
-		pipelineInsts[1]=pipelineInsts[0];
-		pipelineInsts[0]=tmp;
-		cycles++;
-
+	  //print(instPtr,instnum++);
+	  printP2(pipelineInsts[0],pipelineInsts[1],pipelineInsts[2],
+		  pipelineInsts[3],pipelineInsts[4],cycles);
+	  
+	  
+	  //check # of executions
+	  if(pipelineInsts[2]->inst !=0)
+	    executions++;
+	  
+	  
+	  
+	  InstInfo * tmp = pipelineInsts[4];
+	  pipelineInsts[4]=pipelineInsts[3];
+	  pipelineInsts[3]=pipelineInsts[2];
+	  pipelineInsts[2]=pipelineInsts[1];
+	  pipelineInsts[1]=pipelineInsts[0];
+	  pipelineInsts[0]=tmp;
+	  cycles++;
+	  
 	}
-
+	
 	
 	
 	// put in your own variables

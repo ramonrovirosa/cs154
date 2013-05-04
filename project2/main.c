@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 		if( pipelineInsts[3]->destreg == pipelineInsts[1]->input1){
 
-		  printf("\nDepend mem to decode: pipelineInsts[1]->input1: %d,  pipelineInsts[3]->destreg: %d\n", pipelineInsts[1]->input1, pipelineInsts[3]->destreg);
+		  //printf("\nDepend mem to decode: pipelineInsts[1]->input1: %d,  pipelineInsts[3]->destreg: %d\n", pipelineInsts[1]->input1, pipelineInsts[3]->destreg);
 
 		  // if the instruction that just went through the memory function
 		  // is a lw then you pull from memout otherwise you pull from aluout
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 		pipelineInsts[1]->s1data = pipelineInsts[4]->memout;
 	      }else{
 		pipelineInsts[1]->s1data = pipelineInsts[4]->aluout;
-		printf("\n s1data: %d, aluout: %d \n",pipelineInsts[1]->s1data,  pipelineInsts[4]->aluout);
+		//printf("\n s1data: %d, aluout: %d \n",pipelineInsts[1]->s1data,  pipelineInsts[4]->aluout);
 	      }
 	    }
 	    

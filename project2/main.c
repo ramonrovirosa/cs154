@@ -4,6 +4,15 @@
 #include <strings.h>
 #include "functions.h"
 
+//#define DEBUG
+#ifdef DEBUG
+#define debug(f,...) fprintf(stderr,f,##__VA_ARGS__)
+#else
+#define debug(f,...)
+#endif
+
+
+
 InstInfo * pipelineInsts[5];
 
 int main(int argc, char *argv[])
@@ -26,22 +35,94 @@ int main(int argc, char *argv[])
 	maxpc = load(argv[1]);
 	//printLoad(maxpc);
 	//printf("finished load");
-	int cycles = 0, executions=0, stalling = 0;
+	int cycles = 0, executions=0, stalling = 0,branchTaken=0, branchstalling=0;
 	int maxPC = maxpc + 4;
 	while (pc <= maxPC)
 	{
 	  //if(pc <=  maxpc+4){
 	  if(stalling==0)//if stalling dont fetch
 	    fetch(pipelineInsts[0]);
-	    // }
-	    // else{
-	    // pc++;
-	    // }
-	  if(pipelineInsts[1]->inst != 0 && stalling == 0)
+	  // printf("\nPC: %d \n", pc);
+	  if(pipelineInsts[1]->inst != 0 && stalling == 0){
 		decode(pipelineInsts[1]);
+		if (pipelineInsts[1]->fields.op==39){
+		  //bge
+		  //dep btw decode and execute, stall if lw
+		  if(pipelineInsts[2]->destreg  == pipelineInsts[1]->input1){
+		    branchstalling=1;
+		  }
+		  //dep btw decode and execute, stall if lw
+		  else if(pipelineInsts[2]->destreg  == pipelineInsts[1]->input2){
+		    branchstalling=1;
+		  }
+		  //dep. btw decode and memory, stall if lw
+		  else if(pipelineInsts[3]->destreg  == pipelineInsts[1]->input1){
+		    if(pipelineInsts[3]->fields.op==6){
+		      branchstalling=1;
+		    }
+		    else{
+		      branchstalling=0;
+		      pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
+		    }
+		  }
+		  //dep. btw decode and memory, stall if lw
+		  else if(pipelineInsts[3]->destreg  == pipelineInsts[1]->input2){
+		    if(pipelineInsts[3]->fields.op==6){
+		      branchstalling=1;
+		    }
+		    else{
+		      branchstalling=0;
+		      pipelineInsts[1]->s2data = pipelineInsts[3]->aluout;
+		    }
+		  }
+		  //dep. btw decode and writeback, grab from mem out if lw
+		  else if(pipelineInsts[4]->destreg  == pipelineInsts[1]->input1){
+		    if(pipelineInsts[3]->fields.op==6){
+		      branchstalling=0;
+		      pipelineInsts[1]->s1data = pipelineInsts[3]->memout;
+		    }
+		    else{
+		      branchstalling=0;
+		      pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
+		    }
+		  }
+		  //dep. btw decode and writeback, grab from mem out if lw
+		  else if(pipelineInsts[4]->destreg  == pipelineInsts[1]->input2){
+		    if(pipelineInsts[3]->fields.op==6){
+		      branchstalling=0;
+		      pipelineInsts[1]->s2data = pipelineInsts[3]->memout;
+		    }
+		    else{
+		      branchstalling=0;
+		      pipelineInsts[1]->s2data = pipelineInsts[3]->aluout;
+		    }
+		  }
+		}
+		//bge op code is 39
+		//printf("\nPC: %d \n", pc);
+		//bge
+		if(pipelineInsts[1]->fields.op==39 && 
+		   (pipelineInsts[1]->s1data >= pipelineInsts[1]->s2data) ){
+		  branchTaken = 1;
+		  //maxPC++;
+		}
+		//j & jal
+		if(pipelineInsts[1]->fields.op==36 || pipelineInsts[1]->fields.op==34){
+		  branchTaken = 1;
+		}
+		  
+	  }
+	  
 	  stalling = 0;
 	  if(pipelineInsts[2]->inst != 0){
 		execute(pipelineInsts[2]);
+		//if bge, then you need to decrement pc
+		//b.c fetch increments pc by 1
+		if(( pipelineInsts[2]->fields.op == 39  && pipelineInsts[2]->aluout>=0) /*||
+		   pipelineInsts[2]->fields.op == 36        ||
+		   pipelineInsts[2]->fields.op == 34*/ ){
+		  pc--;
+		}
 		
 		//add1 $s2,$s1,$0
 		//add2 $s1,$0,$0 //$s1 dependency
@@ -70,28 +151,30 @@ int main(int argc, char *argv[])
 	    memory(pipelineInsts[3]);	
 
 
-		if( pipelineInsts[3]->destreg == pipelineInsts[1]->input1){
+	    if( pipelineInsts[3]->destreg == pipelineInsts[1]->input1){
 
-		  //printf("\nDepend mem to decode: pipelineInsts[1]->input1: %d,  pipelineInsts[3]->destreg: %d\n", pipelineInsts[1]->input1, pipelineInsts[3]->destreg);
+	      //printf("\nDepend mem to decode: pipelineInsts[1]->input1: %d,  
+	      //pipelineInsts[3]->destreg: %d\n", pipelineInsts[1]->input1,
+	      //pipelineInsts[3]->destreg);
 
-		  // if the instruction that just went through the memory function
-		  // is a lw then you pull from memout otherwise you pull from aluout
-		  if(pipelineInsts[3]->fields.op == 6){
-		    pipelineInsts[1]->s1data = pipelineInsts[3]->memout;
-		  }else if(pipelineInsts[1]->fields.op==2){
-		    //pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
+	      // if the instruction that just went through the memory function
+	      // is a lw then you pull from memout otherwise you pull from aluout
+	      if(pipelineInsts[3]->fields.op == 6){
+		pipelineInsts[1]->s1data = pipelineInsts[3]->memout;
+	      }else if(pipelineInsts[1]->fields.op==2){
+		//pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
 
-		  }else{
-		    pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
-		  }
-		}
-	        if(pipelineInsts[3]->destreg  == pipelineInsts[1]->input2){
-		  if(pipelineInsts[3]->fields.op == 6){
-		    pipelineInsts[1]->s2data = pipelineInsts[3]->memout;
-		  }else{
-		    pipelineInsts[1]->s2data = pipelineInsts[3]->aluout;
-		  }
-		}
+	      }else{
+		pipelineInsts[1]->s1data = pipelineInsts[3]->aluout;
+	      }
+	    }
+	    if(pipelineInsts[3]->destreg  == pipelineInsts[1]->input2){
+	      if(pipelineInsts[3]->fields.op == 6){
+		pipelineInsts[1]->s2data = pipelineInsts[3]->memout;
+	      }else{
+		pipelineInsts[1]->s2data = pipelineInsts[3]->aluout;
+	      }
+	    }
 	  }
 
 	  if(pipelineInsts[4]->inst != 0){
@@ -103,7 +186,8 @@ int main(int argc, char *argv[])
 		pipelineInsts[1]->s1data = pipelineInsts[4]->memout;
 	      }else{
 		pipelineInsts[1]->s1data = pipelineInsts[4]->aluout;
-		//printf("\n s1data: %d, aluout: %d \n",pipelineInsts[1]->s1data,  pipelineInsts[4]->aluout);
+		//printf("\n s1data: %d, aluout: %d \n",pipelineInsts[1]->s1data,  
+		//pipelineInsts[4]->aluout);
 	      }
 	    }
 	    
@@ -148,6 +232,11 @@ int main(int argc, char *argv[])
 	  }
 	  cycles++;
 	  
+	  if(branchTaken == 1){
+	    pipelineInsts[1]->inst = 0;
+	  }
+	  branchTaken = 0;
+
 	}
 	
 	

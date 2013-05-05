@@ -273,6 +273,8 @@ void decode(InstInfo *instruction)
 	    instruction->input1 = instruction->fields.imm;
 	    //instruction->input2 = instruction->fields.rt;
 	    instruction->s1data = instruction->input1;
+	    branchControl(instruction);
+	    pc--;
 	  }
 	  // if it is a jal
 	else if(instruction->fields.op ==  34)
@@ -291,6 +293,8 @@ void decode(InstInfo *instruction)
 	      // fill in s1data and input2
 	      instruction->input1 = instruction->fields.imm;
 	      instruction->s1data = instruction->input1;
+	      branchControl(instruction);
+	      pc--;
 	    }
 
 
@@ -337,7 +341,7 @@ void execute(InstInfo *instruction)
     //instruction->destdata = instruction->aluout;
     //instruction->destreg = instruction->aluout;
   }
-  //sub 101
+  //sub, bge 101
   if(instruction->signals.aluop == 5){
     instruction->aluout = instruction->s1data - instruction->s2data;
   }
@@ -365,8 +369,8 @@ void execute(InstInfo *instruction)
   
   instruction->destdata = instruction->aluout;
   //instruction->destreg = instruction->aluout;
-  
-  branchControl(instruction);
+  if (instruction->fields.op==39)
+    branchControl(instruction);
 }
 
 /* memory
@@ -419,12 +423,12 @@ void branchControl(InstInfo *instruction){
 	if (instruction->signals.btype == 1){
 		//JAL
 		if(instruction->signals.rw){
-			regfile[31] = pc;
-			pc = instruction->fields.imm;
+			regfile[31] = pc-1;
+			pc = instruction->fields.imm+1;
 		}
 		//J
 		else{
-			pc = instruction->fields.imm;
+			pc = instruction->fields.imm+1;
 		}
 	}
 	//BGE

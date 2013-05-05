@@ -404,6 +404,7 @@ void memory(InstInfo *instruction)
  *
  * If a register file is supposed to be written, write to it now
  */
+int raaddr=0;
 void writeback(InstInfo *instruction)
 {	//if register write
 	if(instruction->signals.rw) {
@@ -414,31 +415,36 @@ void writeback(InstInfo *instruction)
 			else //choose memory output
 				regfile[instruction->destreg] = instruction->memout;
 		}
-		else // for jal => $ra = PC
-			regfile[instruction->destreg] = instruction->pc;
+		else{ // for jal => $ra = PC
+		  //regfile[instruction->destreg] = instruction->pc;
+		  regfile[31]=raaddr;
+		  raaddr=0;
+		}
 	}
 }
 //modifying pc & $ra for jal
 void branchControl(InstInfo *instruction){
-	if (instruction->signals.btype == 1){
-		//JAL
-		if(instruction->signals.rw){
-			regfile[31] = pc-1;
-			pc = instruction->fields.imm+1;
-		}
-		//J
-		else{
-			pc = instruction->fields.imm+1;
-		}
-	}
-	//BGE
-	if (instruction->signals.btype==2){
-		//if(( (instruction->aluout | 0x10000000) == 1) || (instruction->aluout == 0 )){
-	  if( instruction->aluout >= 0){
-	    pc = pc + instruction->fields.imm; 
-	  }
-	}
-
-
+  if (instruction->signals.btype == 1){
+	  //JAL
+    if(instruction->signals.rw){
+      //regfile[31] = pc-1;
+      raaddr=pc-1;
+      pc = instruction->fields.imm+1;
+    }
+    //J
+    else{
+      raaddr=pc-1;
+      pc = instruction->fields.imm+1;
+    }
+  }
+  //BGE
+  if (instruction->signals.btype==2){
+    //if(( (instruction->aluout | 0x10000000) == 1) || (instruction->aluout == 0 )){
+    if( instruction->aluout >= 0){
+      pc = pc + instruction->fields.imm; 
+    }
+  }
+  
+  
 }
 

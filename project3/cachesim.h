@@ -1,3 +1,6 @@
+#ifndef CACHESIM_H
+#define CACHEISM_H
+
 //You have a struct that contains all of the information for one cache.
 typedef struct _cache{
 	int blocksize;
@@ -5,7 +8,7 @@ typedef struct _cache{
 	int addresses;
 	int hitTime;
 	int missPolicy;
-}
+} Cache;
 
 
 void *createAndInitialize(int blocksize, int cachesize, int type);
@@ -22,3 +25,5 @@ int accessesSoFar(void *cache);
 
 int totalAccessTime(void *cache);
 //This returns the total number of cycles that all of the accesses have taken so far. 
+
+#endif

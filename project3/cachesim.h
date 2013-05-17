@@ -1,3 +1,4 @@
+//You have a struct that contains all of the information for one cache.
 typedef struct _cache{
 	int blocksize;
 	int totalCacheSize;
@@ -8,7 +9,7 @@ typedef struct _cache{
 
 
 void *createAndInitialize(int blocksize, int cachesize, int type);
-//You have a struct that contains all of the information for one cache. In this function, you create the cache and initialize it, returning a pointer to the struct. Because you are determining the struct, you return a void * to our main. Type 0 is a direct-mapped cache. Type 1 is a pseudo-associative cache. Type 2 is a 4-way set associative cache. 
+//In this function, you create the cache and initialize it, returning a pointer to the struct. Because you are determining the struct, you return a void * to our main. Type 0 is a direct-mapped cache. Type 1 is a pseudo-associative cache. Type 2 is a 4-way set associative cache. 
 
 int accessCache(void *cache, int address);
 //In this function, we access the cache with a particular address. If the address results in a hit, return 1. If it is a miss, return 0.

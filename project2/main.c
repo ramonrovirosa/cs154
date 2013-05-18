@@ -201,9 +201,10 @@ int main(int argc, char *argv[])
       pipelineInsts[1]=pipelineInsts[0];
       pipelineInsts[0]=tmp;
     }
+    //pipelinInsts[//]->inst = 0;
     //push M, X Down
     else{
-      InstInfo * tmp = pipelineInsts[4];
+      InstInfo * tmp = pipelineInsts[4]; 
       pipelineInsts[4]=pipelineInsts[3];
       pipelineInsts[3]=pipelineInsts[2];
 

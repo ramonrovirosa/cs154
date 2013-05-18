@@ -19,7 +19,9 @@ typedef struct _cache{
   Block*cacheArray4; //array of addresses
   
   int type;//type 1-direct,2-pseudo,3-fourway.
-  
+ 
+  int lruOrder[4];
+ 
   int blocksize;   //
   int totalCacheSize;
 

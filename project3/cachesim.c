@@ -3,13 +3,9 @@
 #include <strings.h>
 #include "cachesim.h"
 
-void main(){
-
-}
-
 //In this function, you create the cache and initialize it, returning a pointer to the struct. Because you are determining the struct, you return a void * to our main. Type 0 is a direct-mapped cache. Type 1 is a pseudo-associative cache. Type 2 is a 4-way set associative cache. 
 Cache *createAndInitialize(int blocksize, int cachesize, int type){
-   	Cache *newcache = (Cache *) malloc(sizeof(Cache));
+   	Cache *newcache = malloc(sizeof(struct _cache));
 	
 	newcache->type = type;
 
@@ -21,9 +17,18 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 	newcache->indexSize= _log2(newcache->numBlocks);
 	newcache->offset=_log2(blocksize);
 
-	newcache->cacheArray = (int*)malloc(sizeof(int)*(newcache->numBlocks));
+	newcache->missesSoFar=0;
+	newcache->accessesSoFar=0;
+	newcache->totalAccessTime=0;
+
+	newcache->cacheArray = malloc(sizeof(struct _block)*(newcache->numBlocks));
+	int i;
+	for(i=0;i<newcache->numBlocks;i++){
+	  newcache->cacheArray[i].valid=0;
+	}
+
 	if(newcache->cacheArray == NULL)
-	  return 0;
+	  return NULL;
 
 	switch(type){
 	case 0:
@@ -45,27 +50,56 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 //In this function, we access the cache with a particular address. If the address results in a hit, return 1. If it is a miss, return 0.
 int accessCache(Cache *cache, int address){
 
+  int index = (address >> cache->offset) & (cache->blocksize-1);
+  int tag = address >> (cache->offset + cache->indexSize);
+  
+  cache->accessesSoFar++;
 
-  return 0;
+  switch(cache->type){
+    //direct
+  case 0:
+
+    if(cache->cacheArray[index].valid == 0 ||
+       ((cache->cacheArray[index].tag != tag) && cache->cacheArray[index].valid == 1) ){
+      cache->cacheArray[index].valid = 1;
+      cache->cacheArray[index].tag = tag;
+      
+      cache->missesSoFar++;
+      cache->totalAccessTime+=101;
+      
+      return 0;	
+    }
+          
+    break;
+
+  //2-associative
+  case 1:
+
+    break;
+
+  //4-associative
+  case 2:
+
+    break;
+  }
+
+  cache->totalAccessTime+=1;
+  return 1;
 }
 
 //This returns the number of misses that have occurred so far
 int missesSoFar(Cache *cache){
-
-
-   return 0;
+  return cache->missesSoFar;
 }
 
 //This returns the number of accesses that have occurred so far
 int accessesSoFar(Cache *cache){
-
-   return 0;
+  return cache->accessesSoFar;
 }
 
 //This returns the total number of cycles that all of the accesses have taken so far. 
 int totalAccessTime(Cache *cache){
-
-   return 0;
+   return cache->totalAccessTime;
 }
 
 

@@ -1,9 +1,19 @@
 #ifndef CACHESIM_H
 #define CACHEISM_H
 
+
+typedef struct _block{
+
+  int tag;
+  int valid;
+
+}Block;
+
+
+
 //You have a struct that contains all of the information for one cache.
 typedef struct _cache{
-  int *cacheArray; //array of addresses
+  Block*cacheArray; //array of addresses
   
   int type;//type 1-direct,2-pseudo,3-fourway.
   
@@ -21,6 +31,7 @@ typedef struct _cache{
   int totalAccessTime;
 
 } Cache;
+
 
 
 Cache *createAndInitialize(int blocksize, int cachesize, int type);

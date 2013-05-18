@@ -21,13 +21,22 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 	newcache->accessesSoFar=0;
 	newcache->totalAccessTime=0;
 
-	newcache->cacheArray = malloc(sizeof(struct _block)*(newcache->numBlocks));
+	newcache->cacheArray1 = malloc(sizeof(struct _block)*(newcache->numBlocks));
+	newcache->cacheArray2 = malloc(sizeof(struct _block)*(newcache->numBlocks));
+	newcache->cacheArray3 = malloc(sizeof(struct _block)*(newcache->numBlocks));
+	newcache->cacheArray4 = malloc(sizeof(struct _block)*(newcache->numBlocks));
 	int i;
 	for(i=0;i<newcache->numBlocks;i++){
-	  newcache->cacheArray[i].valid=0;
+	  newcache->cacheArray1[i].valid=0;
+	  newcache->cacheArray2[i].valid=0;
+	  newcache->cacheArray3[i].valid=0;
+	  newcache->cacheArray4[i].valid=0;
 	}
 
-	if(newcache->cacheArray == NULL)
+	if(newcache->cacheArray1 == NULL || 
+	   newcache->cacheArray2 == NULL || 
+	   newcache->cacheArray3 == NULL || 
+	   newcache->cacheArray4 == NULL)
 	  return NULL;
 
 	switch(type){
@@ -36,11 +45,11 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 	  break;
 	case 1:
 	  //2-associative
-	   newcache->numSets=cachesize/blocksize/2;
+	   //newcache->numSets=cachesize/blocksize/2;
 	  break;
 	case 2:
 	  //4 assosciative
-	  newcache->numSets=cachesize/blocksize/4;
+	  //newcache->numSets=cachesize/blocksize/4;
 	  break;
 	}
 
@@ -59,15 +68,15 @@ int accessCache(Cache *cache, int address){
     //direct
   case 0:
 
-    if(cache->cacheArray[index].valid == 1 && cache->cacheArray[index].tag == tag){
+    if((cache->cacheArray1[index].valid == 1) && (cache->cacheArray1[index].tag == tag)){
       cache->totalAccessTime+=1;
       return 1;
     }
     else{
-      //if(cache->cacheArray[index].valid == 0 ||
-      //((cache->cacheArray[index].tag != tag) && cache->cacheArray[index].valid == 1) ){
-      cache->cacheArray[index].valid = 1;
-      cache->cacheArray[index].tag = tag;
+      //if(cache->cacheArray1[index].valid == 0 ||
+      //((cache->cacheArray1[index].tag != tag) && cache->cacheArray1[index].valid == 1) ){
+      cache->cacheArray1[index].valid = 1;
+      cache->cacheArray1[index].tag = tag;
       
       cache->missesSoFar++;
       cache->totalAccessTime+=101;
@@ -77,7 +86,29 @@ int accessCache(Cache *cache, int address){
 
   //2-associative
   case 1:
-
+	if(cache->cacheArray1[index].valid == 0 && cache->cacheArray2[index].valid == 0){
+      		cache->cacheArray1[index].valid = 1;
+      		cache->cacheArray1[index].tag = tag;
+      		cache->cacheArray2[index].tag =0;
+		cache->cacheArray2[index].valid = 1;
+      		cache->missesSoFar++;
+	      	cache->totalAccessTime+=102;
+		return 0;
+	}else if(cache->cacheArray1[index].tag == tag || cache->cacheArray2[index].tag == tag){
+	      	cache->totalAccessTime+=1;
+		if (cache->cacheArray2[index].tag == tag){
+			int temp = cache->cacheArray1[index].tag;
+			cache->cacheArray1[index].tag = cache->cacheArray2[index].tag;
+			cache->cacheArray2[index].tag =temp;
+		}	
+      		return 1;
+	}else if(cache->cacheArray1[index].valid == 1 && cache->cacheArray2[index].valid == 1){
+		cacheArray2[index].tag = cacheArray1[index].tag;
+		cacheArray1[index].tag = tag;
+      		cache->missesSoFar++;
+	      	cache->totalAccessTime+=102;
+      		return 0;
+	}
     break;
 
   //4-associative

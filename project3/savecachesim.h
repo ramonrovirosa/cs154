@@ -6,17 +6,14 @@ typedef struct _block{
 
   int tag;
   int valid;
-	int LRUflag;
+
 }Block;
 
 
 
 //You have a struct that contains all of the information for one cache.
 typedef struct _cache{
-  Block*cacheArray1; //array of addresses
-  Block*cacheArray2; //array of addresses
-  Block*cacheArray3; //array of addresses
-  Block*cacheArray4; //array of addresses
+  Block*cacheArray; //array of addresses
   
   int type;//type 1-direct,2-pseudo,3-fourway.
   

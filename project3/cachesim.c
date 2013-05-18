@@ -49,18 +49,23 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 
 //In this function, we access the cache with a particular address. If the address results in a hit, return 1. If it is a miss, return 0.
 int accessCache(Cache *cache, int address){
-
-  int index = (address >> cache->offset) & (cache->blocksize-1);
+  //printf("after addr is shifted by offset: %d\n",(address>> cache->offset));
+  int index = (address >> cache->offset) & (_pow2(cache->blocksize)-1);
   int tag = address >> (cache->offset + cache->indexSize);
-  
+
   cache->accessesSoFar++;
 
   switch(cache->type){
     //direct
   case 0:
 
-    if(cache->cacheArray[index].valid == 0 ||
-       ((cache->cacheArray[index].tag != tag) && cache->cacheArray[index].valid == 1) ){
+    if(cache->cacheArray[index].valid == 1 && cache->cacheArray[index].tag == tag){
+      cache->totalAccessTime+=1;
+      return 1;
+    }
+    else{
+      //if(cache->cacheArray[index].valid == 0 ||
+      //((cache->cacheArray[index].tag != tag) && cache->cacheArray[index].valid == 1) ){
       cache->cacheArray[index].valid = 1;
       cache->cacheArray[index].tag = tag;
       
@@ -69,8 +74,6 @@ int accessCache(Cache *cache, int address){
       
       return 0;	
     }
-          
-    break;
 
   //2-associative
   case 1:
@@ -108,4 +111,9 @@ int _log2( int x )
   int ans = 0 ;
   while( x>>=1 ) ans++;
   return ans ;
+}
+
+int _pow2( int x )
+{
+  return 1<<x;
 }

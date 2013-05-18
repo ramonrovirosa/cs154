@@ -14,14 +14,14 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 
     //fix division not allowed
     if(newcache->type==1){
-        newcache->numBlocks= (int)(cachesize/blocksize)>>1;
+      newcache->numBlocks= (int)(cachesize>>(_log2(blocksize)))>>1;
         //printf("numBlocks for 2 way is %d\n"
     }
     else if(newcache->type==2)
-       newcache->numBlocks= (int)(cachesize/blocksize);
+       newcache->numBlocks= (int)(cachesize>>(_log2(blocksize)));
       // newcache->numBlocks= (int)(cachesize/blocksize)>>2;
     else
-        newcache->numBlocks= (int)(cachesize/blocksize);
+        newcache->numBlocks= (int)(cachesize>>(_log2(blocksize)));
     
     //printf("numBlocks is %d\n",newcache->numBlocks);
     newcache->indexSize= _log2(newcache->numBlocks);
@@ -93,7 +93,7 @@ int accessCache(Cache *cache, int address){
     if(cache->cacheArray1[index].valid == 0 && cache->cacheArray2[index].valid == 0){
       		cache->cacheArray1[index].valid = 1;
       		cache->cacheArray1[index].tag = tag;
-      		cache->cacheArray2[index].tag =-101010;
+      		cache->cacheArray2[index].tag =-1;
         cache->cacheArray2[index].valid = 1;
       		cache->missesSoFar++;
           	cache->totalAccessTime+=102;

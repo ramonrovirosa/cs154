@@ -10,6 +10,12 @@ typedef struct _cache{
   int blocksize;   //
   int totalCacheSize;
 
+  int numBlocks;
+  int numSets;
+
+  int offset;
+  int indexSize;
+  
   int missesSoFar;
   int accessesSoFar;
   int totalAccessTime;
@@ -30,6 +36,8 @@ int accessesSoFar(Cache *cache);
 //This returns the number of accesses that have occurred so far
 
 int totalAccessTime(Cache *cache);
-//This returns the total number of cycles that all of the accesses have taken so far. 
+//This returns the total number of cycles that all of the accesses have taken so far.
+
+int _log2( int x ); 
 
 #endif

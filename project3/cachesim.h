@@ -56,4 +56,10 @@ int totalAccessTime(Cache *cache);
 
 int _log2( int x ); 
 
+int _pow2( int x );
+
+int whereIs(Cache* cache, int targetWord);
+
+void reorder(Cache* cache, int foundAt);
+
 #endif

@@ -39,10 +39,10 @@ Cache *createAndInitialize(int blocksize, int cachesize, int type){
 	   newcache->cacheArray4 == NULL)
 	  return NULL;
 	
-	cache->lruOrder[0]=1;
-	cache->lruOrder[1]=2;
-	cache->lruOrder[2]=3;
-	cache->lruOrder[3]=4;
+	newcache->lruOrder[0]=1;
+	newcache->lruOrder[1]=2;
+	newcache->lruOrder[2]=3;
+	newcache->lruOrder[3]=4;
 	
 	return newcache;
 }
@@ -94,8 +94,8 @@ int accessCache(Cache *cache, int address){
 		}	
       		return 1;
 	}else if(cache->cacheArray1[index].valid == 1 && cache->cacheArray2[index].valid == 1){
-		cacheArray2[index].tag = cacheArray1[index].tag;
-		cacheArray1[index].tag = tag;
+		cache->cacheArray2[index].tag = cache->cacheArray1[index].tag;
+		cache->cacheArray1[index].tag = tag;
       		cache->missesSoFar++;
 	      	cache->totalAccessTime+=102;
       		return 0;
@@ -143,15 +143,15 @@ int accessCache(Cache *cache, int address){
 	      	cache->totalAccessTime+=1;
 		return 1;
 	}else{
-		int theSwap = cache.lruOrder[3];
+		int theSwap = cache->lruOrder[3];
 		if (theSwap==1)
-			cache.cacheArray1[index].tag = tag;
+			cache->cacheArray1[index].tag = tag;
 		else if (theSwap==2)
-			cache.cacheArray2[index].tag = tag;
+			cache->cacheArray2[index].tag = tag;
 		else if (theSwap==3)
-			cache.cacheArray3[index].tag = tag;
+			cache->cacheArray3[index].tag = tag;
 		else if (theSwap==4)
-			cache.cacheArray4[index].tag = tag;
+			cache->cacheArray4[index].tag = tag;
 		reorder(cache,theSwap);
                 cache->missesSoFar++;
                 cache->totalAccessTime+=103;
@@ -193,29 +193,29 @@ int _pow2( int x )
   return 1<<x;
 }
 
-int whereIs(cache* cache, int targetWord){
+int whereIs(Cache* cache, int targetWord){
 	int i;
 	for(i=0;i<4;i++){
-		if(cache.lruOrder[i]==targetWord)
+		if(cache->lruOrder[i]==targetWord)
 			return i;
 	}
 }
 
-void reorder(cache* cache, int foundAt){
+void reorder(Cache* cache, int foundAt){
 	if(foundAt==1){
-		int temp = cache.lruOrder[0];
-		cache.lruOrder[0] = cache.lruOrder[1];
-		cache.lruOrder[1]= temp;
+		int temp = cache->lruOrder[0];
+		cache->lruOrder[0] = cache->lruOrder[1];
+		cache->lruOrder[1]= temp;
 	}else if (foundAt ==2){
-		int temp = cache.lruOrder[0];
-		cache.lruOrder[0]=cacheOrder[2];
-		cache.lruOrder[2]=cacheOrder[1];
-		cache.lruOrder[1]=temp;
+		int temp = cache->lruOrder[0];
+		cache->lruOrder[0]=cache->lruOrder[2];
+		cache->lruOrder[2]=cache->lruOrder[1];
+		cache->lruOrder[1]=temp;
 	}else if (foundAt == 3){
-		int temp = cache.lruOrder[0];
-		cache.lruOrder[0]=cacheOrder[3];
-		cache.lruOrder[3]=cacheOrder[2];
-		cache.lruOrder[2]=cacheOrder[1];
-		cache.lruOrder[1]=temp;
+		int temp = cache->lruOrder[0];
+		cache->lruOrder[0]=cache->lruOrder[3];
+		cache->lruOrder[3]=cache->lruOrder[2];
+		cache->lruOrder[2]=cache->lruOrder[1];
+		cache->lruOrder[1]=temp;
 	}
 }

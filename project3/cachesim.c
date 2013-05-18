@@ -93,13 +93,13 @@ int accessCache(Cache *cache, int address){
     if(cache->cacheArray1[index].valid == 0 && cache->cacheArray2[index].valid == 0){
       		cache->cacheArray1[index].valid = 1;
       		cache->cacheArray1[index].tag = tag;
-      		cache->cacheArray2[index].tag =0;
+      		cache->cacheArray2[index].tag =-101010;
         cache->cacheArray2[index].valid = 1;
       		cache->missesSoFar++;
           	cache->totalAccessTime+=102;
         return 0;
     }else if(cache->cacheArray1[index].tag == tag || cache->cacheArray2[index].tag == tag){
-          	cache->totalAccessTime+=1;
+      cache->totalAccessTime+=1;
         if (cache->cacheArray2[index].tag == tag){
             int temp = cache->cacheArray1[index].tag;
             cache->cacheArray1[index].tag = cache->cacheArray2[index].tag;

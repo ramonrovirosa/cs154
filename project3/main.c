@@ -10,9 +10,11 @@ int main(int argc, char* argv[]){
 	for(i=0;i<109;i+=4){
 		printMe = accessCache(testDirect,i);
 		printf("%d: Hit? %d\n",i,printMe);
+		printf("AccesTime so far: %d\n", totalAccessTime(testDirect));
 	}
 	for(i=0;i<109;i+=4){
 		printMe = accessCache(testDirect,i);
 		printf("%d: Hit? %d\n",i,printMe);
+		printf("AccesTime so far: %d\n", totalAccessTime(testDirect));
 	}
 }

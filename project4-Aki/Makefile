@@ -1,2 +1,2 @@
-bp: branchsim.c main.c
-	gcc -o bp  branchsim.c main.c 
+bp: bsimGolf.c main.c
+	gcc -o bp  bsimGolf.c main.c 

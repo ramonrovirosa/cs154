@@ -6,11 +6,7 @@
 BP *createAndInitialize(int numEntries){
 //Allocate a table with numEntries entries, each initialized to the not-taken state. numEntries will be a power of 2.
 	BP *newBP = malloc(sizeof(BP));
-	newBP->ptable = malloc(numEntries*sizeof(int));
-	int i;
-	for(i=0;i<numEntries;i++){
-		newBP->ptable[i] = 0; //initialized to the most extreme “not taken” state
-	}
+	newBP->ptable = calloc(numEntries,sizeof(int));
 	newBP->tablesize = numEntries; 
 	newBP->accesses = 0;
 	newBP->mispredictions = 0;
@@ -29,35 +25,35 @@ void updateBranchPredictor(BP *bp, int PC, int result){
 	int prediction = bp->ptable[index];
 	
 	switch(prediction){
-	case 0:{
-		if(result == 1){
-			bp->ptable[index] = 1;
-			bp->mispredictions++;	
+		case 0:{
+			if(result == 1){
+				bp->ptable[index] = 1;
+				bp->mispredictions++;	
+			}
+		return;
+		}case 1:{
+			if(result == 1){
+				bp->ptable[index] = 3;
+				bp->mispredictions++;
+			}
+			else{ bp->ptable[index] = 0;}
+		return;
+		}case 2:{
+			if(result == 1){
+				bp->ptable[index] = 3;
+			}
+			else{
+				bp->ptable[index] = 0;
+				bp->mispredictions++;
+			}
+		return;
+		}case 3:{
+			if(result == 0){
+				bp->ptable[index] = 2;
+				bp->mispredictions++;
+			}
+		return;
 		}
-	return;
-	}case 1:{
-		if(result == 1){
-			bp->ptable[index] = 3;
-			bp->mispredictions++;
-		}
-		else{ bp->ptable[index] = 0;}
-	return;
-	}case 2:{
-		if(result == 1){
-			bp->ptable[index] = 3;
-		}
-		else{
-			bp->ptable[index] = 0;
-			bp->mispredictions++;
-		}
-	return;
-	}case 3:{
-		if(result == 0){
-			bp->ptable[index] = 2;
-			bp->mispredictions++;
-		}
-	return;
-	}
 	}//end switch	
 }	
 int numAccesses(BP *bp){

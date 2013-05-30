@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
-#include "bsimGolf.h"
+#include "branchsim.h"
 
 int main(int argc, char* argv[]){
 	BP *bp = createAndInitialize(3);
